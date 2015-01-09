@@ -77,7 +77,7 @@ public class TextEditor extends JFrame implements ActionListener, KeyListener{
 	private JMenuItem menuItemRedo;
 	private JMenuItem menuItemAbout;
 	
-	private int index = 0;
+	private int index =1;
 	
 	private JMenu menuLookAndFeel;
 	
@@ -363,15 +363,21 @@ public class TextEditor extends JFrame implements ActionListener, KeyListener{
 			
 		} else if (e.getSource() == menuItemUndo) {
 			
-			if(0 <= index && index <= historyVector.size() )
-				txtArea.setText(historyVector.get(index == 0 ? 0 : --index));
-			
+			if(0 <= index && index <= historyVector.size() ){
+				index = index == 0 ? 0 : index-1;
+				txtArea.setText(historyVector.get(index));
+			}
+			System.out.println(index + " - " +historyVector.get(index));
 			
 		} else if( e.getSource() == menuItemRedo) {
 			
-			if(0 <= index && index <= historyVector.size() )
-				txtArea.setText(historyVector.get(index+1 == historyVector.size() ? index : index++));
-			
+			if(0 <= index && index <= historyVector.size() ){
+				index = index+1 == historyVector.size() ? index : index+1;
+				
+				txtArea.setText(historyVector.get(index));
+			}
+		
+			System.out.println(index + " - " +historyVector.get(index));
 		} else if ( e.getSource() instanceof JMenuItem ) {
 			
 			JMenuItem item = (JMenuItem) e.getSource();
@@ -410,10 +416,10 @@ public class TextEditor extends JFrame implements ActionListener, KeyListener{
 		historyVector.add(txtArea.getText());
 		index++;
 		
-		if(!historyVector.isEmpty())
+		/*if(!historyVector.isEmpty())
 		for(int i = index+1 ; i < historyVector.size() ; i++) {
 			historyVector.remove(i);
-		}
+		}*/
 	}
 	
 	
