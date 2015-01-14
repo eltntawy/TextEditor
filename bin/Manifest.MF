@@ -1,2 +1,2 @@
-Main-Class: TextEditor
+Main-Class: com.editor.text.TextEditor
 SplashScreen-Image: SplashScreen.png
