@@ -1,4 +1,4 @@
-
+package com.editor.text;
 
 /**
  * 		@author eltntawy
