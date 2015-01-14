@@ -75,6 +75,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.plaf.SliderUI;
 import javax.swing.JPopupMenu;
@@ -85,7 +87,7 @@ import java.awt.Cursor;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-public class TextEditor extends JFrame implements ActionListener, KeyListener,ChangeListener {
+public class TextEditor extends JFrame implements ActionListener, KeyListener, ChangeListener {
 
     private JTextArea txtArea;
     private JScrollPane mainPanel;
@@ -142,18 +144,18 @@ public class TextEditor extends JFrame implements ActionListener, KeyListener,Ch
     private JButton btnCopy;
     private JButton btnPast;
     private JButton btnCut;
-    private JButton btnOpen; 
+    private JButton btnOpen;
     private JButton btnUndo;
     private JButton btnRedo;
     private JComboBox<String> comboBoxFont;
     private JComboBox<String> comboBoxColor;
-    
-    private Font oldFont ;
+
+    private Font oldFont;
     private Font newFont;
-    
-    private Color oldColor= Color.black ;
-    private Color newColor= Color.black ;
-    
+
+    private Color oldColor = Color.black;
+    private Color newColor = Color.black;
+
     private JSlider sizeJSlider;
 
     public TextEditor() {
@@ -161,7 +163,7 @@ public class TextEditor extends JFrame implements ActionListener, KeyListener,Ch
 	initSplashScreen();
 	init();
 	dynInit();
-	
+
 	setExtendedState(MAXIMIZED_BOTH);
     }
 
@@ -208,9 +210,9 @@ public class TextEditor extends JFrame implements ActionListener, KeyListener,Ch
 
 	oldFont = txtArea.getFont();
 	newFont = txtArea.getFont();
-	
+
 	popupMenu = new JPopupMenu();
-	popupMenu.setPreferredSize(new Dimension(100,100));
+	popupMenu.setPreferredSize(new Dimension(100, 100));
 	addPopup(txtArea, popupMenu);
 	mainPanel = new JScrollPane();
 	menuBar = new JMenuBar();
@@ -323,15 +325,11 @@ public class TextEditor extends JFrame implements ActionListener, KeyListener,Ch
 	popupMenuItemUndo.addActionListener(this);
 	popupMenuItemRedo.addActionListener(this);
 	// ----------------------------------------------------------------
-	
-	
+
 	comboBoxFont = new JComboBox<String>();
 	comboBoxColor = new JComboBox<String>();
 	sizeJSlider = new JSlider(JSlider.HORIZONTAL);
-	    
-	    
-	    
-	    
+
 	txtArea.addKeyListener(this);
 	historyVector.add("");
 
@@ -429,7 +427,7 @@ public class TextEditor extends JFrame implements ActionListener, KeyListener,Ch
 	btnSave.setMinimumSize(new Dimension(40, 40));
 	btnSave.setIcon(new ImageIcon(TextEditor.class.getResource("/ico/Save.png")));
 	menuBar.add(btnSave);
-	
+
 	btnOpen = new JButton("");
 	btnOpen.setPreferredSize(new Dimension(60, 40));
 	btnOpen.setIcon(new ImageIcon(TextEditor.class.getResource("/ico/Folder Open.png")));
@@ -471,74 +469,143 @@ public class TextEditor extends JFrame implements ActionListener, KeyListener,Ch
 
 	comboBoxColor = new JComboBox();
 	menuBar.add(comboBoxColor);
-	
+
 	menuBar.add(sizeJSlider);
-	
+
 	// font
-	    DefaultComboBoxModel<String> fontListModel = new DefaultComboBoxModel<String>();
-	    GraphicsEnvironment genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
-	    for (String fontName : genv.getAvailableFontFamilyNames()) {
-		fontListModel.addElement(fontName);
+	DefaultComboBoxModel<String> fontListModel = new DefaultComboBoxModel<String>();
+	GraphicsEnvironment genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
+	for (String fontName : genv.getAvailableFontFamilyNames()) {
+	    fontListModel.addElement(fontName);
+	}
+	comboBoxFont.setModel(fontListModel);
+	comboBoxFont.addActionListener(this);
+	comboBoxFont.addPopupMenuListener(new PopupMenuListener() {
+
+	    @Override
+	    public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+		// TODO Auto-generated method stub
+
 	    }
-	    comboBoxFont.setModel(fontListModel);
-	    comboBoxFont.addActionListener(this);
 
-
-	    // color
-	    DefaultComboBoxModel<String> colorListModel = new DefaultComboBoxModel<String>();
-	    colorListModel.addElement("BLACK");
-	    colorListModel.addElement("RED");
-	    colorListModel.addElement("GREEN");
-	    colorListModel.addElement("BLUE");
-	    colorListModel.addElement("Color Picker");
-	    comboBoxColor.setModel(colorListModel);
-	    comboBoxColor.addActionListener(this);
-	    comboBoxColor.setRenderer(new ListCellRenderer<String>() {
-
-		@Override
-		public Component getListCellRendererComponent(JList<? extends String> list, String value, int index, boolean isSelected, boolean cellHasFocus) {
-
-		    JLabel l = new JLabel(value);
-		    l.setOpaque(true);
-		    Color selectedColor = null;
-
-		    if (isSelected) {
-			if ("RED" == value) {
-			    selectedColor = Color.RED;
-			} else if ("GREEN" == value) {
-			    selectedColor = Color.GREEN;
-			} else if ("BLUE" == value) {
-			    selectedColor = Color.BLUE;
-			} else if ("BLACK" == value) {
-			    selectedColor = Color.BLACK;
-			}
-			l.setBackground(selectedColor);
-			l.setForeground(Color.WHITE);
-
-		    } else {
-			l.setBackground(Color.WHITE);
-		    }
-		    return l;
-
+	    @Override
+	    public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+		// TODO Auto-generated method stub
+		if (oldFont == newFont) {
+		    txtArea.setFont(newFont);
+		} else {
+		    txtArea.setFont(oldFont);
 		}
-	    });
+	    }
 
-	    
+	    @Override
+	    public void popupMenuCanceled(PopupMenuEvent e) {
+		// TODO Auto-generated method stub
 
-	    // font size
+	    }
+	});
 
-	    sizeJSlider.setMaximum(60);
-	    sizeJSlider.setMinimum(10);
-	    sizeJSlider.setMajorTickSpacing(10);
-	    sizeJSlider.setMinorTickSpacing(5);
-	    sizeJSlider.setPaintTicks(true);
-	    sizeJSlider.setPaintLabels(true);
-	    sizeJSlider.setPaintTrack(true);
-	    sizeJSlider.setValue(oldFont.getSize());
+	// color
+	DefaultComboBoxModel<String> colorListModel = new DefaultComboBoxModel<String>();
+	colorListModel.addElement("BLACK");
+	colorListModel.addElement("RED");
+	colorListModel.addElement("GREEN");
+	colorListModel.addElement("BLUE");
+	colorListModel.addElement("Color Picker");
+	comboBoxColor.setModel(colorListModel);
+	comboBoxColor.addActionListener(this);
+	comboBoxColor.addPopupMenuListener(new PopupMenuListener() {
 
-	    sizeJSlider.addChangeListener(this);
-	
-	
+	    @Override
+	    public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+		// TODO Auto-generated method stub
+
+	    }
+
+	    @Override
+	    public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+		// TODO Auto-generated method stub
+
+		if (oldColor == newColor) {
+		    txtArea.setForeground(newColor);
+		} else {
+		    txtArea.setForeground(oldColor);
+		}
+	    }
+
+	    @Override
+	    public void popupMenuCanceled(PopupMenuEvent e) {
+		// TODO Auto-generated method stub
+
+	    }
+	});
+	comboBoxFont.setRenderer(new ListCellRenderer<String>() {
+
+	    @Override
+	    public Component getListCellRendererComponent(JList<? extends String> list, String value, int index, boolean isSelected, boolean cellHasFocus) {
+		// TODO Auto-generated method stub
+		JLabel l = new JLabel(value);
+		l.setOpaque(true);
+
+		if (isSelected) {
+		    newFont = new Font(value, oldFont.getStyle(), oldFont.getSize());
+		    txtArea.setFont(newFont);
+		    l.setBackground(Color.gray);
+		} else {
+		    l.setBackground(Color.WHITE);
+		}
+
+		return l;
+	    }
+
+	});
+
+	comboBoxColor.setRenderer(new ListCellRenderer<String>() {
+
+	    @Override
+	    public Component getListCellRendererComponent(JList<? extends String> list, String value, int index, boolean isSelected, boolean cellHasFocus) {
+
+		JLabel l = new JLabel(value);
+		l.setOpaque(true);
+		Color selectedColor = null;
+
+		if (isSelected) {
+		    if ("RED" == value) {
+			selectedColor = Color.RED;
+		    } else if ("GREEN" == value) {
+			selectedColor = Color.GREEN;
+		    } else if ("BLUE" == value) {
+			selectedColor = Color.BLUE;
+		    } else if ("BLACK" == value) {
+			selectedColor = Color.BLACK;
+		    }
+		    l.setBackground(selectedColor);
+		    l.setForeground(Color.WHITE);
+
+		    txtArea.setForeground(selectedColor);
+		    newColor = selectedColor;
+
+		} else {
+		    l.setBackground(Color.WHITE);
+		}
+		return l;
+
+	    }
+	});
+
+	// font size
+
+	sizeJSlider.setMaximum(60);
+	sizeJSlider.setMinimum(10);
+	sizeJSlider.setMajorTickSpacing(10);
+	sizeJSlider.setMinorTickSpacing(5);
+	sizeJSlider.setPaintTicks(true);
+	sizeJSlider.setPaintLabels(true);
+	sizeJSlider.setPaintTrack(true);
+	sizeJSlider.setValue(oldFont.getSize());
+
+	sizeJSlider.addChangeListener(this);
+
 	btnOpen.addActionListener(this);
 	btnCopy.addActionListener(this);
 	btnCut.addActionListener(this);
@@ -547,7 +614,6 @@ public class TextEditor extends JFrame implements ActionListener, KeyListener,Ch
 	btnPast.addActionListener(this);
 	btnRedo.addActionListener(this);
 	btnUndo.addActionListener(this);
-	
 
     }
 
@@ -555,39 +621,38 @@ public class TextEditor extends JFrame implements ActionListener, KeyListener,Ch
     public void actionPerformed(ActionEvent e) {
 	// TODO Auto-generated method stub
 
-	if(e.getSource() == comboBoxColor ) {
+	if (e.getSource() == comboBoxColor) {
 	    String color = comboBoxColor.getSelectedItem().toString();
 	    Color selectedColor = Color.black;
 	    if ("RED" == color) {
-		    selectedColor = Color.RED;
-		} else if ("GREEN" == color) {
-		    selectedColor = Color.GREEN;
-		} else if ("BLUE" == color) {
-		    selectedColor = Color.BLUE;
-		} else if ("BLACK" == color) {
-		    selectedColor = Color.BLACK;
-		} else if ("Color Picker".equals(color)) {
-		    
-		    selectedColor = JColorChooser.showDialog(TextEditor.this, "Choose your Color", oldColor);
-		}
-		txtArea.setForeground(selectedColor);
-		
-		oldColor = selectedColor;
-	    
+		selectedColor = Color.RED;
+	    } else if ("GREEN" == color) {
+		selectedColor = Color.GREEN;
+	    } else if ("BLUE" == color) {
+		selectedColor = Color.BLUE;
+	    } else if ("BLACK" == color) {
+		selectedColor = Color.BLACK;
+	    } else if ("Color Picker".equals(color)) {
+
+		selectedColor = JColorChooser.showDialog(TextEditor.this, "Choose your Color", oldColor);
+	    }
+	    txtArea.setForeground(selectedColor);
+
+	    oldColor = selectedColor;
+
 	} else if (e.getSource() == comboBoxFont) {
-	    
-	    oldFont = new Font(comboBoxFont.getSelectedItem().toString(),oldFont.getStyle(),sizeJSlider.getValue());
-	    
+
+	    oldFont = new Font(comboBoxFont.getSelectedItem().toString(), oldFont.getStyle(), sizeJSlider.getValue());
+
 	    txtArea.setFont(oldFont);
 	}
-	
-	
+
 	if (e.getSource() == menuItemNew || e.getSource() == popupMenuItemNew || e.getSource() == btnNew) {
 	    if (JOptionPane.showConfirmDialog(this, "Are you sure to open new Text Editor ?") == JOptionPane.OK_OPTION) {
 		txtArea.setText("");
 	    }
 
-	} else if (e.getSource() == menuItemOpen || e.getSource() == popupMenuItemOpen || e.getSource() == btnOpen ) {
+	} else if (e.getSource() == menuItemOpen || e.getSource() == popupMenuItemOpen || e.getSource() == btnOpen) {
 
 	    final JDialog d = new JDialog(this, true);
 	    d.setSize(300, 75);
@@ -663,7 +728,7 @@ public class TextEditor extends JFrame implements ActionListener, KeyListener,Ch
 
 	    txtArea.paste();
 
-	} else if (e.getSource() == menuItemCut || e.getSource() == popupMenuItemCut || e.getSource() == btnCut ) {
+	} else if (e.getSource() == menuItemCut || e.getSource() == popupMenuItemCut || e.getSource() == btnCut) {
 
 	    txtArea.copy();
 	    int start = txtArea.getSelectionStart();
@@ -1178,22 +1243,22 @@ public class TextEditor extends JFrame implements ActionListener, KeyListener,Ch
 
 	@Override
 	public boolean accept(File f) {
-		// TODO Auto-generated method stub
+	    // TODO Auto-generated method stub
 
-		if (f.getName().endsWith(".txt") || f.getName().endsWith(".java") || f.isDirectory()) {
-			return true;
-		}
-		return false;
+	    if (f.getName().endsWith(".txt") || f.getName().endsWith(".java") || f.isDirectory()) {
+		return true;
+	    }
+	    return false;
 	}
 
 	@Override
 	public String getDescription() {
-		// TODO Auto-generated method stub
-		return "Text files (*.txt, *.java)";
+	    // TODO Auto-generated method stub
+	    return "Text files (*.txt, *.java)";
 	}
 
-}
-    
+    }
+
     private static void addPopup(Component component, final JPopupMenu popup) {
 	component.addMouseListener(new MouseAdapter() {
 	    public void mousePressed(MouseEvent e) {
@@ -1226,26 +1291,24 @@ public class TextEditor extends JFrame implements ActionListener, KeyListener,Ch
 	}
 
 	SwingUtilities.invokeLater(new Runnable() {
-	    
+
 	    @Override
 	    public void run() {
 		// TODO Auto-generated method stub
 		SwingUtilities.updateComponentTreeUI(textEditor);
 	    }
 	});
-	
 
     }
-
 
     @Override
     public void stateChanged(ChangeEvent e) {
 	// TODO Auto-generated method stub
 	int fontSize = 0;
 
-	    fontSize = ((JSlider) e.getSource()).getValue();
-
-	    newFont = new Font(newFont.getName(), newFont.getStyle(), fontSize);
-	    txtArea.setFont(newFont);
+	fontSize = ((JSlider) e.getSource()).getValue();
+	oldFont = new Font(newFont.getName(), newFont.getStyle(), fontSize);
+	newFont = new Font(newFont.getName(), newFont.getStyle(), fontSize);
+	txtArea.setFont(newFont);
     }
 }
